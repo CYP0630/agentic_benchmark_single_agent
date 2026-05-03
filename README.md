@@ -13,20 +13,20 @@ python main.py trading -s NVDA --start 2026-01-02 --end 2026-04-30 -m openai:gpt
 python main.py trading -s AAPL --start 2026-01-02 --end 2026-04-30 -m openai:gpt-5.4<br>
 
 #### qwen
-python main.py trading -s TSLA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b
-python main.py trading -s MSFT --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b
-python main.py trading -s NVDA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b
-python main.py trading -s AAPL --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b
+python main.py trading -s TSLA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b<br>
+python main.py trading -s MSFT --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b<br>
+python main.py trading -s NVDA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b<br>
+python main.py trading -s AAPL --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-397b-a17b<br>
 
-python main.py trading -s TSLA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b
-python main.py trading -s MSFT --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b
-python main.py trading -s NVDA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b
-python main.py trading -s AAPL --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b
+python main.py trading -s TSLA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b<br>
+python main.py trading -s MSFT --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b<br>
+python main.py trading -s NVDA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b<br>
+python main.py trading -s AAPL --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-27b<br>
 
-python main.py trading -s TSLA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b
-python main.py trading -s MSFT --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b
-python main.py trading -s NVDA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b
-python main.py trading -s AAPL --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b
+python main.py trading -s TSLA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b<br>
+python main.py trading -s MSFT --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b<br>
+python main.py trading -s NVDA --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b<br>
+python main.py trading -s AAPL --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b<br>
 
 
 ### Hedging
