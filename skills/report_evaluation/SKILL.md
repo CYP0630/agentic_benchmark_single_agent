@@ -231,7 +231,7 @@ Each `per_report` item must include `filename`, `report_date`, `extracted`,
 
 **Run the `upsert_evaluation.py` script**  do NOT write output files manually,
 do NOT generate helper scripts, and do NOT use inline Python for file I/O. The
-script lives at `.claude/skills/report_evaluation/scripts/upsert_evaluation.py`
+script lives at `skills/report_evaluation/scripts/upsert_evaluation.py`
 and owns filename sanitization, JSON writing, and Markdown summary writing.
 
 ### How to call it
@@ -240,7 +240,7 @@ Pass the completed evaluation JSON payload on stdin and pass run identity via
 CLI flags, mirroring the `trading` skill's `upsert_decision.py` pattern:
 
 ```bash
-cat tmp_eval_payload.json | python3 .claude/skills/report_evaluation/scripts/upsert_evaluation.py \
+cat tmp_eval_payload.json | python3 skills/report_evaluation/scripts/upsert_evaluation.py \
   --symbol NVDA \
   --model claude-sonnet-4-6 \
   --output-root <whatever the caller specified, e.g. /io/slot1>
