@@ -13,8 +13,8 @@ wheels/
 .env
 
 # Data & outputs
-data/
 results/
+io/
 
 # OS
 .DS_Store

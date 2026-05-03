@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "trading_mcp": {
-      "command": "python3",
-      "args": [".claude/skills/trading/scripts/mcp/trading_mcp.py"]
-    }
-  }
-}
