@@ -26,20 +26,13 @@ def _normalize_spec(spec: str) -> str:
 def model_id(spec: str | None) -> str:
     """Bare model name suitable for filename suffix (no provider prefix).
 
-    Sanitizes the model name to be filesystem-safe by replacing any character
-    that is not alphanumeric, underscore, or hyphen with an underscore.
-    This matches the sanitization logic in upsert_decision.py.
-
     Examples:
       None                            -> "claude-sonnet-4-6"  (deepagents default)
       "openai:gpt-4o"                 -> "gpt-4o"
-      "openai:gpt-5.4"                -> "gpt-5_4"  (dot replaced)
       "anthropic:claude-sonnet-4-6"   -> "claude-sonnet-4-6"
       "claude-sonnet-4-6"             -> "claude-sonnet-4-6"
       "openrouter:vendor/model"       -> "vendor_model"
     """
-    import re
-
     if spec is None:
         return "claude-sonnet-4-6"
     s = _normalize_spec(spec)
@@ -48,11 +41,7 @@ def model_id(spec: str | None) -> str:
         if s.startswith(prefix):
             s = s[len(prefix):]
             break
-    # Replace slashes AND any non-alphanumeric/underscore/hyphen chars
-    # to match upsert_decision.py's _sanitize() logic
-    s = s.replace("/", "_")
-    s = re.sub(r"[^A-Za-z0-9_-]", "_", s)
-    return s
+    return s.replace("/", "_")
 
 
 def _resolve_model(spec: str | None):

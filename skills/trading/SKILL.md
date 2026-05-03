@@ -62,7 +62,7 @@ of full news highlights or filing bodies can exceed the model's context limit.
 
 ### Writing the result — `upsert_decision.py` (CLI, not MCP)
 
-Use the standalone script `skills/trading/scripts/upsert_decision.py`
+Use the standalone script `.claude/skills/trading/scripts/upsert_decision.py`
 via the Bash tool to write each day's record. It owns all the file-I/O logic
 (load-or-create, sanitize filename, upsert by date, sort, recompute
 `start_date`/`end_date`, write JSON) so you don't have to write inline Python.
@@ -125,12 +125,12 @@ This keeps the decision valid under any data population policy.
    trading days; longer windows give MACD/EMA more time to converge) if a
    technical signal would confirm / contradict your read.
 
-5. **Run `skills/trading/scripts/upsert_decision.py` via Bash** to
+5. **Run `.claude/skills/trading/scripts/upsert_decision.py` via Bash** to
    record the decision. The script owns load-or-create / sort /
    recompute-bounds / write. Don't write JSON yourself. Example:
 
    ```bash
-   python3 skills/trading/scripts/upsert_decision.py \
+   python3 .claude/skills/trading/scripts/upsert_decision.py \
        --symbol SYMBOL --target-date TARGET_DATE \
        --price PRICE_TODAY --action <BUY|SELL|HOLD> \
        --model <your model id> \
@@ -144,7 +144,7 @@ Compute date offsets with the bundled helper — one call covers every offset
 you need for the day:
 
 ```bash
-python3 skills/trading/scripts/date_offset.py TARGET_DATE 7 30 60 365
+python3 .claude/skills/trading/scripts/date_offset.py TARGET_DATE 7 30 60 365
 ```
 
 Prints one `<days>\t<YYYY-MM-DD>` line per offset, in argument order. Do not
@@ -188,14 +188,14 @@ user that the date is a non-trading day.
 
 **Run the `upsert_decision.py` script via the Bash tool** — do NOT write
 inline Python for the write step, and do NOT generate the full JSON yourself.
-The script lives at `skills/trading/scripts/upsert_decision.py` and
+The script lives at `.claude/skills/trading/scripts/upsert_decision.py` and
 owns everything: sanitizes filename, loads-or-creates the JSON, upserts the
 record by `target_date`, sorts, recomputes `start_date`/`end_date`, writes.
 
 ### How to call it
 
 ```bash
-python3 skills/trading/scripts/upsert_decision.py \
+python3 .claude/skills/trading/scripts/upsert_decision.py \
     --symbol TSLA \
     --target-date 2025-03-03 \
     --price 284.65 \
@@ -280,7 +280,7 @@ date's record (lets the caller re-run one day).
    | 'ma' | 'bbands')` with a window you choose (e.g. 30 / 60 / 120 trading
    days) if a technical signal helps.
 6. Decide `action` based on the data you actually fetched.
-7. Run `python3 skills/trading/scripts/upsert_decision.py` via the
+7. Run `python3 .claude/skills/trading/scripts/upsert_decision.py` via the
    Bash tool with the 5 required flags. Don't write inline Python.
 
 One record in, one record out. The caller decides when to mark `status` as

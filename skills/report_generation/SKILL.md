@@ -147,7 +147,7 @@ parameter (e.g. RSI(7) instead of RSI(14)).
    bundled helper rather than doing date math yourself:
 
    ```bash
-   python3 skills/report_generation/scripts/date_offset.py TARGET_DATE 7 30
+   python3 .claude/skills/report_generation/scripts/date_offset.py TARGET_DATE 7 30
    ```
 
    It prints one `<days>\t<YYYY-MM-DD>` line per offset. Then call
@@ -393,7 +393,7 @@ Do NOT predict specific price targets.
 Use the bundled write helper.
 
 ```bash
-python3 skills/report_generation/scripts/upsert_report.py \
+python3 .claude/skills/report_generation/scripts/upsert_report.py \
     --symbol TSLA \
     --target-date 2025-03-07 \
     --action BUY \
