@@ -37,6 +37,12 @@ python main.py hedging --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qw
 python main.py hedging --start 2026-01-02 --end 2026-04-30 -m openrouter:qwen/qwen3.5-9b<br>
 
 ### Audting
+python main.py auditing --ticker rrr --filing-name 10k --issue-time 20231231 --concept-id us-gaap:AssetsCurrent --period "FY2023" -m anthropic:claude-sonnet-4-6<br>
+python main.py auditing --ticker rrr --filing-name 10k --issue-time 20231231 --concept-id us-gaap:AssetsCurrent --period "FY2023" -m openai:gpt-5.4<br>
+python main.py auditing --ticker rrr --filing-name 10k --issue-time 20231231 --concept-id us-gaap:AssetsCurrent --period "FY2023" -m openrouter:qwen/qwen3.5-397b-a17b<br>
+python main.py auditing --ticker rrr --filing-name 10k --issue-time 20231231 --concept-id us-gaap:AssetsCurrent --period "FY2023" -m openrouter:qwen/qwen3.5-27b<br>
+python main.py auditing --ticker rrr --filing-name 10k --issue-time 20231231 --concept-id us-gaap:AssetsCurrent --period "FY2023" -m openrouter:qwen/qwen3.5-9b<br>
+
 
 ### Report Generation
 python main.py report-generation -s AAPL --start 2026-01-02 --end 2026-04-30 -m anthropic:claude-sonnet-4-6
