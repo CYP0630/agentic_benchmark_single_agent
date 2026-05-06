@@ -44,7 +44,10 @@ def cmd_trading(
     concurrency: int = typer.Option(1, "--concurrency", "-c", help="Max concurrent agent calls"),
     test: bool = typer.Option(False, "--test", help="Test mode: only run the first 3 trading days"),
     output_root: str = typer.Option(None, "--output-root", help="Output dir (default: results/trading)"),
+    db_path: str = typer.Option(None, "--db-path", help="Override DuckDB path (default: data/env.duckdb). For live experiments pass data/Live/<DATE>.duckdb."),
 ):
+    from pathlib import Path
+
     from src.trading_pipeline import run_pipeline
 
     start_d = date.fromisoformat(start)
@@ -56,7 +59,8 @@ def cmd_trading(
     if test:
         dates = dates[:3]
     inputs = [{"symbol": symbol, "date": d} for d in dates]
-    asyncio.run(run_pipeline(inputs, concurrency=concurrency, model=model, output_root=output_root))
+    extra = {"db_path": Path(db_path)} if db_path else {}
+    asyncio.run(run_pipeline(inputs, concurrency=concurrency, model=model, output_root=output_root, **extra))
 
 
 @app.command("report-generation")
@@ -100,7 +104,10 @@ def cmd_hedging(
     end: str = typer.Option(..., "--end", help="End date YYYY-MM-DD (inclusive)"),
     model: str = typer.Option(None, "--model", "-m"),
     output_root: str = typer.Option(None, "--output-root", help="Output dir (default: results/hedging)"),
+    db_path: str = typer.Option(None, "--db-path", help="Override DuckDB path (default: data/env.duckdb). For live experiments pass data/Live/<DATE>.duckdb."),
 ):
+    from pathlib import Path
+
     from src.hedging_pipeline import run_pipeline
 
     start_d = date.fromisoformat(start)
@@ -110,7 +117,8 @@ def cmd_hedging(
 
     dates = _trading_dates(start_d, end_d)
     inputs = [{"date": d, "is_first_day": (i == 0)} for i, d in enumerate(dates)]
-    asyncio.run(run_pipeline(inputs, model=model, output_root=output_root))
+    extra = {"db_path": Path(db_path)} if db_path else {}
+    asyncio.run(run_pipeline(inputs, model=model, output_root=output_root, **extra))
 
 
 @app.command("auditing")

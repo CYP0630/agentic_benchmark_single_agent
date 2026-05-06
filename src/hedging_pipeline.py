@@ -328,6 +328,18 @@ async def run_pipeline(
             {**it, "left": fixed_left, "right": fixed_right}
             for it in items
         ]
+        # If the output JSON already exists (i.e. this is a resume / a single-
+        # day re-entry from an external date loop), force is_first_day=False on
+        # every item. The hedging skill explicitly STOPs when IS_FIRST_DAY=True
+        # is paired with an existing output file (see SKILL.md "IS_FIRST_DAY ×
+        # FIXED_PAIR × output file consistency check"), so we have to override
+        # the caller's i==0 assumption when continuing an existing run.
+        out_file = out / f"hedging_{fixed_left}_{fixed_right}_{slug.lower()}.json"
+        if out_file.exists():
+            items = [{**it, "is_first_day": False} for it in items]
+            logfire.info(
+                f"Resume detected at {out_file} — forcing is_first_day=False for all items"
+            )
 
     with logfire.span(
         "hedging.run n={n} model={m} out={o} retries={r}",
