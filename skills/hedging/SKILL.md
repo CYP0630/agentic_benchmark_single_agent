@@ -38,33 +38,39 @@ The user invocation specifies:
      and use the last returned date.
 2. **`IS_FIRST_DAY`** — boolean, **default `False`**. The caller's assertion of
    whether `TARGET_DATE` is the run's first day:
-   - `True` → the caller declares this is a brand-new run; agent runs pair
-     selection (using only info ≤ `TARGET_DATE`), then writes the first record.
+   - `True` → the caller declares this is a brand-new run; if no `FIXED_PAIR`
+     is given, run pair selection; otherwise use the given pair directly.
    - `False` → the caller declares the run is already in progress; agent reads
      the existing pair from the output file and only does daily hedging.
+3. **`FIXED_PAIR`** — Optional. If the invocation explicitly states
+   `left=X, right=Y` and instructs you to **skip pair selection**, treat those
+   values as the pre-determined `(LEFT, RIGHT)` for the whole run. Write the
+   first record with this pair immediately without running pair selection.
+   This overrides the `IS_FIRST_DAY=True` pair-selection flow.
 
-The pair `(LEFT, RIGHT)` is never passed in by the caller. It is determined
-exactly two ways:
-- `IS_FIRST_DAY=True` → agent runs pair selection and writes `(LEFT, RIGHT)`
-  into the output file.
-- `IS_FIRST_DAY=False` → agent reads `(LEFT, RIGHT)` from the existing output
-  file.
+The pair `(LEFT, RIGHT)` is determined in the following priority order:
+- If `FIXED_PAIR` is given in the invocation → use it directly, skip selection.
+- If `IS_FIRST_DAY=True` and no `FIXED_PAIR` → agent runs pair selection.
+- If `IS_FIRST_DAY=False` → agent reads `(LEFT, RIGHT)` from the existing output file.
 
 Typical user phrasings:
-- `start hedging on 2025-03-03` (→ `IS_FIRST_DAY=True`)
-- `run hedging for 2025-03-04` (→ `IS_FIRST_DAY=False`, the default)
+- `start hedging on 2025-03-03` (→ `IS_FIRST_DAY=True`, no `FIXED_PAIR`)
+- `start hedging on 2026-01-02 with fixed pair: left=GOOGL, right=MSFT` (→ `IS_FIRST_DAY=True`, `FIXED_PAIR` given)
+- `run hedging for 2025-03-04` (→ `IS_FIRST_DAY=False`)
 
-### IS_FIRST_DAY × output file consistency check
+### IS_FIRST_DAY × FIXED_PAIR × output file consistency check
 
-Before doing anything else, compare `IS_FIRST_DAY` to whether the output file
-at `<output-root>/hedging_*_<model>.json` already exists:
+Before doing anything else, evaluate the combination of `IS_FIRST_DAY`,
+`FIXED_PAIR`, and whether the output file at `<output-root>/hedging_*_<model>.json`
+already exists:
 
-| `IS_FIRST_DAY` | Output file exists? | Action |
-|---|---|---|
-| `True` | No | ✅ Proceed with pair selection. |
-| `False` | Yes | ✅ Read pair from file, proceed with daily hedging. |
-| `True` | **Yes** | **STOP**: report to user that running pair selection would overwrite the existing run. Tell them to delete the file or use a different `--output-root` if they really want a fresh run. |
-| `False` | **No** | **STOP**: report to user that no existing pair is on disk; the first invocation of a run must pass `IS_FIRST_DAY=True`. |
+| `IS_FIRST_DAY` | `FIXED_PAIR` given? | Output file exists? | Action |
+|---|---|---|---|
+| `True` | Yes | No | ✅ Use the given pair directly, skip selection, write first record. |
+| `True` | No | No | ✅ Proceed with pair selection. |
+| `False` | — | Yes | ✅ Read pair from file, proceed with daily hedging. |
+| `True` | — | **Yes** | **STOP**: report to user that the run already exists. Tell them to delete the file or use a different `--output-root` for a fresh run. |
+| `False` | — | **No** | **STOP**: report to user that no existing pair is on disk; the first invocation must pass `IS_FIRST_DAY=True`. |
 
 In both stop cases, **do NOT call `upsert_hedging_decision.py`** — just report
 the situation and exit.
@@ -193,10 +199,15 @@ calls must not request data beyond the current decision date:
 
 ## Pair Selection
 
-Only run this when `IS_FIRST_DAY=True` and the output file does not yet exist
-(see the consistency check above). The `selection_date` is simply
-`TARGET_DATE` — that's the day the run begins, and pair selection must use
-only information visible by then.
+**Skip this entire section if `FIXED_PAIR` was given in the invocation.**
+When `left=X, right=Y` is explicitly stated, use those values directly as
+`(LEFT, RIGHT)` and proceed immediately to the Daily Hedging section to write
+the first record.
+
+Only run pair selection when `IS_FIRST_DAY=True`, **no `FIXED_PAIR` was given**,
+and the output file does not yet exist (see the consistency check above).
+The `selection_date` is simply `TARGET_DATE` — that's the day the run begins,
+and pair selection must use only information visible by then.
 
 1. Call `get_stock_pool()` and use its `symbols`.
 2. Set `selection_date = TARGET_DATE`. (No window math needed — TARGET_DATE

@@ -19,6 +19,41 @@ SKILL_DIR = "/skills/hedging/"
 MCP_SCRIPT = PROJECT_ROOT / "skills" / "hedging" / "scripts" / "mcp" / "hedging_mcp.py"
 DEFAULT_OUTPUT_ROOT = PROJECT_ROOT / "results" / "hedging"
 
+# Pre-determined fixed pairs per model (keyed by bare model name, no provider/vendor prefix).
+# LEFT is the long leg, RIGHT is the short leg on the opening LONG_SHORT action.
+_FIXED_PAIRS: dict[str, tuple[str, str]] = {
+    "claude-sonnet-4-6":  ("GOOGL", "MSFT"),
+    "gpt-5.4":            ("MSFT",  "TSLA"),
+    "qwen3.5-397b-a17b":  ("AAPL",  "MSFT"),
+    "qwen3.5-27b":        ("GOOGL", "MSFT"),
+}
+
+
+def _pair_key(model: str | None) -> str:
+    """Extract bare model name for _FIXED_PAIRS lookup.
+
+    Strips provider prefix (anthropic:, openai:, openrouter:) and vendor/org
+    prefix separated by '/' (e.g. 'qwen/qwen3.5-397b-a17b' → 'qwen3.5-397b-a17b').
+
+    Examples:
+      None                                    -> "claude-sonnet-4-6"
+      "anthropic:claude-sonnet-4-6"           -> "claude-sonnet-4-6"
+      "openai:gpt-5.4"                        -> "gpt-5.4"
+      "openrouter:qwen/qwen3.5-397b-a17b"     -> "qwen3.5-397b-a17b"
+      "openrouter:qwen/qwen3.5-27b"           -> "qwen3.5-27b"
+    """
+    if not model:
+        return "claude-sonnet-4-6"
+    s = model
+    for prefix in ("anthropic:", "openai:", "openrouter:"):
+        if s.startswith(prefix):
+            s = s[len(prefix):]
+            break
+    # Strip vendor/org prefix (e.g. "qwen/")
+    if "/" in s:
+        s = s.rsplit("/", 1)[-1]
+    return s
+
 
 def _mcp_servers(db_path: Path) -> dict:
     return {
@@ -190,11 +225,23 @@ async def run_one(
         - (False, error_msg) if failed after all retries
     """
     verb = "start" if item.get("is_first_day") else "run"
-    prompt = (
-        f"{verb} hedging on {item['date']}. "
-        f"Use --model {model_slug} and --output-root {output_root} "
-        f"when calling upsert_hedging_decision.py."
-    )
+    fixed_left = item.get("left")
+    fixed_right = item.get("right")
+    if fixed_left and fixed_right:
+        skip_note = "Skip pair selection and use this pair directly. " if item.get("is_first_day") else ""
+        prompt = (
+            f"{verb} hedging on {item['date']}. "
+            f"The fixed pair for this run is: left={fixed_left}, right={fixed_right}. "
+            f"{skip_note}"
+            f"Use --model {model_slug} and --output-root {output_root} "
+            f"when calling upsert_hedging_decision.py."
+        )
+    else:
+        prompt = (
+            f"{verb} hedging on {item['date']}. "
+            f"Use --model {model_slug} and --output-root {output_root} "
+            f"when calling upsert_hedging_decision.py."
+        )
     thread_id = item["date"]
 
     for attempt in range(max_retries):
@@ -270,6 +317,17 @@ async def run_pipeline(
     out = Path(output_root) if output_root else DEFAULT_OUTPUT_ROOT
     out.mkdir(parents=True, exist_ok=True)
     slug = model_id(model)
+
+    # Resolve fixed pair for this model and inject into every item so the agent
+    # always knows the correct (left, right) and never runs free pair selection.
+    key = _pair_key(model)
+    fixed_left, fixed_right = _FIXED_PAIRS.get(key, (None, None))
+    if fixed_left and fixed_right:
+        logfire.info(f"Fixed pair for {key}: left={fixed_left}, right={fixed_right}")
+        items = [
+            {**it, "left": fixed_left, "right": fixed_right}
+            for it in items
+        ]
 
     with logfire.span(
         "hedging.run n={n} model={m} out={o} retries={r}",
